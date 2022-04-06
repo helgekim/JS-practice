@@ -1,0 +1,170 @@
+function checkCashRegister(price, cash, cid) {
+  let change = cash - price;
+
+  const transformedCID = cid.map(
+    element => {
+
+      let nominal;
+
+      switch (element[0]) {
+        case "PENNY":
+          nominal = 0.01;
+          break;
+
+        case "NICKEL":
+          nominal = 0.05;
+          break;
+
+        case "DIME":
+          nominal = 0.1;
+          break;
+
+        case "QUARTER":
+          nominal = 0.25;
+          break;
+
+
+        case "ONE":
+          nominal = 1.0;
+          break;
+
+
+        case "FIVE":
+          nominal = 5.0;
+          break;
+
+
+        case "TEN":
+          nominal = 10.0;
+          break;
+
+        case "TWENTY":
+          nominal = 20.0;
+          break;
+
+        case "ONE HUNDRED":
+          nominal = 100.0;
+          break;
+
+      }
+
+      return [nominal, Math.floor(element[1] / nominal), element[1]]
+
+    }
+  ).reverse()
+
+
+const cidtotal = cid.map(element => element[1])
+                      .reduce((element1, element2)=> element1 + element2)
+
+if (cidtotal < change) {
+    return {
+      "status": "INSUFFICIENT_FUNDS",
+      "change": []
+    }
+} else if (cidtotal == change) {
+  return {
+      "status": "CLOSED",
+      "change": cid
+    }
+}
+
+  let storage = [];
+
+  for (let unit = 0; unit < transformedCID.length; unit++) {
+    
+    let nominal = transformedCID[unit][0];
+    let banknote = 0;
+    let number = 0; 
+    
+    for (let time = 1; time <= transformedCID[unit][1]; banknote++) {
+
+
+      if (change - transformedCID[unit][0] >= 0) {
+        change -= transformedCID[unit][0];
+        transformedCID[unit][1]--;
+        transformedCID[unit][2]-= transformedCID[unit][0];
+        banknote = time;
+        number += transformedCID[unit][0];
+        continue;
+      } else {
+        break;
+      }
+    }
+
+    if (number == 0) {
+      continue
+    } else {
+      storage.push([nominal, banknote, number]);
+    }
+
+  }
+
+  storage = storage.map(
+    element => {
+      let nominal;
+
+      switch (element[0]) {
+        case 0.01:
+          nominal = "PENNY";
+          element[2] += 0.01;
+          break;
+
+        case 0.05:
+          nominal = "NICKEL";
+          break;
+
+        case 0.1:
+          nominal = "DIME";
+          break;
+
+        case 0.25:
+          nominal = "QUARTER";
+          break;
+
+
+        case 1:
+          nominal = "ONE";
+          break;
+
+
+        case 5:
+          nominal = "FIVE";
+          break;
+
+
+        case 10:
+          nominal = "TEN";
+          break;
+
+        case 20:
+          nominal = "TWENTY";
+          break;
+
+        case 100:
+          nominal = "ONE HUNDRED";
+          break;
+      }
+
+    return [nominal, element[2]]
+    }
+  )
+
+const storageTotal = storage.map(element => element[1])
+                      .reduce((element1, element2)=> element1 + element2);
+
+
+if (change > storageTotal) {
+    return {
+      "status": "INSUFFICIENT_FUNDS",
+      "change": []
+    }
+}
+
+
+
+return {"status": "OPEN", "change": storage}
+  
+}
+
+console.log(checkCashRegister(3.26, 100, [["PENNY", 1.01], ["NICKEL", 2.05], ["DIME", 3.1], ["QUARTER", 4.25], ["ONE", 90], ["FIVE", 55], ["TEN", 20], ["TWENTY", 60], ["ONE HUNDRED", 100]]));
